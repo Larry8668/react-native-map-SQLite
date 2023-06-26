@@ -52,7 +52,7 @@ export default function FilterOptions() {
   return (
     <View style={styles.filterWrapper}>
       <View style={styles.filterOptionContainer}>
-        <Text>Option-1</Text>
+        <Text>Default (No filter)</Text>
         <Switch
           trackColor={{ false: "#81b0ff", true: "#D4E6FF" }}
           thumbColor={option1Selected ? "#8AB9FF" : "#E5EFFE"}
@@ -62,7 +62,7 @@ export default function FilterOptions() {
         />
       </View>
       <View style={styles.filterOptionContainer}>
-        <Text>Option-2</Text>
+        <Text>Within specified radius (as per dummy data)</Text>
         <Switch
           trackColor={{ false: "#81b0ff", true: "#D4E6FF" }}
           thumbColor={option2Selected ? "#8AB9FF" : "#E5EFFE"}
@@ -72,7 +72,7 @@ export default function FilterOptions() {
         />
       </View>
       <View style={styles.filterOptionContainer}>
-        <Text>Option-3</Text>
+        <Text>Of Specified Grp</Text>
         <Switch
           trackColor={{ false: "#81b0ff", true: "#D4E6FF" }}
           thumbColor={option3Selected ? "#8AB9FF" : "#E5EFFE"}

@@ -21,9 +21,10 @@ import axios from "axios";
 
 const MapScreen = () => {
   const [mapMarkers, setMapMarkers] = useState([]);
-  const [filteredMarkers, setFilteredMarkers] = useState([]);
-
   const { selectedFilter } = useContext(MapContext);
+
+  const searchRadius = 5; //the filter radius
+  const searchGrp = 2; //the filter grp
 
   const initCoord = {
     //set to pesu
@@ -102,7 +103,7 @@ const MapScreen = () => {
                   lat,
                   long,
                   marker.name,
-                  marker.groupCode,
+                  marker.groupCode
                 )
               )
               .catch((error) =>
@@ -114,6 +115,29 @@ const MapScreen = () => {
     }
   };
 
+  //this contains the filtered list after applying the filter func
+  //based on the pre defined search radii and search grp (mentioned in the begining)
+  const filteredMarkers = mapMarkers.filter((marker) => {
+    switch (selectedFilter) {
+      case "option1": {
+        return true;
+      }
+      case "option2": {
+        const tempDist = getDistanceFromLatLonInKm(
+          marker.latitude,
+          marker.longitude,
+          initCoord.latitude,
+          initCoord.longitude
+        );
+        // console.log(tempDist);
+        return tempDist <= searchRadius;
+      }
+      case "option3": {
+        return marker.grp_id === searchGrp;
+      }
+    }
+  });
+
   //driver of entire screen
   //does wat was mentioned in comment b4 handleDropTable func
   useEffect(() => {
@@ -122,7 +146,7 @@ const MapScreen = () => {
   }, []);
 
   //when the data is being saved and called from DB small delay with an aesthetic loading screen 🤌
-  if (mapMarkers.length === 0) {
+  if (filteredMarkers.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Loading...</Text>
@@ -142,8 +166,8 @@ const MapScreen = () => {
           longitudeDelta: deltaCoord.longitudeDelta,
         }}
       >
-        {mapMarkers.length > 0 &&
-          mapMarkers.map((marker) => (
+        {filteredMarkers.length > 0 &&
+          filteredMarkers.map((marker) => (
             <Marker
               // id="${Date.now}" //each marker needs a unique key => current time
 
@@ -159,7 +183,7 @@ const MapScreen = () => {
             />
           ))}
       </MapView>
-      <Text>{selectedFilter}</Text>
+      {/* <Text>{selectedFilter}</Text> */}
     </View>
   );
 };
