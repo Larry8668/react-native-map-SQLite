@@ -9,6 +9,7 @@ const db = SQLite.openDatabase("MapCoords");
 // lat -> REAL (aka float)
 // long -> REAL
 // title -> TEXT (holds name of place)
+// grp_id -> INTEGER
 //-------------------------------------
 
 //all db functions involve promises due to async reasons (pretty sure) 
@@ -19,7 +20,7 @@ export const createTable = () => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS MapCoords (id INTEGER PRIMARY KEY, latitude REAL, longitude REAL, title TEXT)",
+        "CREATE TABLE IF NOT EXISTS MapCoords (id INTEGER PRIMARY KEY, latitude REAL, longitude REAL, title TEXT, grp_id INTEGER)",
         [],
         resolve,
         (_, error) => reject(error)
@@ -29,7 +30,7 @@ export const createTable = () => {
 };
 
 //handles inserertions
-export const insertIntoTable = (id, latitude, longitude, title) => {
+export const insertIntoTable = (id, latitude, longitude, title, grp_id) => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -39,8 +40,8 @@ export const insertIntoTable = (id, latitude, longitude, title) => {
           if (result.rows.length === 0) {
             db.transaction((tx) => {
               tx.executeSql(
-                "INSERT INTO MapCoords (id, latitude, longitude, title) VALUES (?, ?, ?, ?)",
-                [id, latitude, longitude, title],
+                "INSERT INTO MapCoords (id, latitude, longitude, title, grp_id) VALUES (?, ?, ?, ?, ?)",
+                [id, latitude, longitude, title, grp_id],
                 (_, result) => resolve(result),
                 (_, error) => reject(error)
               );
@@ -68,7 +69,7 @@ export const displayTable = () => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS MapCoords (id INTEGER PRIMARY KEY, latitude REAL, longitude REAL, title TEXT)"
+        "CREATE TABLE IF NOT EXISTS MapCoords (id INTEGER PRIMARY KEY, latitude REAL, longitude REAL, title TEXT, grp_id INTEGER)"
       );
       tx.executeSql(
         "SELECT * FROM MapCoords",

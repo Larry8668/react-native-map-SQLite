@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StatusBar, View, Text } from "react-native";
 
 import MapView, { Marker, PROVIDER_OSMDROID } from "react-native-maps";
+
+import { getDistanceFromLatLonInKm } from "../HelperFunc";
+
+import { MapContext } from "../MapContext";
 
 import {
   createTable,
@@ -17,6 +21,9 @@ import axios from "axios";
 
 const MapScreen = () => {
   const [mapMarkers, setMapMarkers] = useState([]);
+  const [filteredMarkers, setFilteredMarkers] = useState([]);
+
+  const { selectedFilter } = useContext(MapContext);
 
   const initCoord = {
     //set to pesu
@@ -36,11 +43,8 @@ const MapScreen = () => {
     await axios
       .get("https://yucca-interface.vercel.app/mapcoordinates")
       .then((res) => {
-        const resWithId = res.data.map((marker, index) => ({
-          ...marker,
-          id: index + 1, //id makes easy to cheq if this is already in db => assign an incrementing id starting from 1
-        }));
-        handleApiDataInsert(resWithId);
+        // console.log(res.data.locations);
+        handleApiDataInsert(res.data.locations);
         fetchAndDisplayData();
       })
       .catch((err) => {
@@ -58,10 +62,10 @@ const MapScreen = () => {
         console.log("Table is empty => Calling API and saving");
         getApiData();
       } else {
-        console.log("Data:", data);
+        console.log("DbData:", data);
         setMapMarkers(data);
-        //data format [{id : (num), lat: (REAL), long: (REAL), title: (TEXT)}]
-        //REAL is datatype in SQLite and it is analogus to 'float' 
+        //data format [{id : (num), lat: (REAL), long: (REAL), title: (TEXT), grp_id: (INTEGER)}]
+        //REAL is datatype in SQLite and it is analogus to 'float'
       }
     } catch (error) {
       console.error("Error displaying table:", error);
@@ -88,16 +92,17 @@ const MapScreen = () => {
       createTable()
         .then(() => {
           item.forEach((marker) => {
-            const lat = marker?.coordinates[0];
-            const long = marker?.coordinates[1];
-            insertIntoTable(marker.id, lat, long, marker.name)
+            const lat = marker?.coordinates?.latitude;
+            const long = marker?.coordinates?.longitude;
+            insertIntoTable(marker.id, lat, long, marker.name, marker.groupCode)
               .then(() =>
                 console.log(
                   "Marker saved to database-->",
                   marker.id,
                   lat,
                   long,
-                  marker.name
+                  marker.name,
+                  marker.groupCode,
                 )
               )
               .catch((error) =>
@@ -115,7 +120,6 @@ const MapScreen = () => {
     fetchAndDisplayData();
     // handleDropTable();
   }, []);
-
 
   //when the data is being saved and called from DB small delay with an aesthetic loading screen 🤌
   if (mapMarkers.length === 0) {
@@ -155,6 +159,7 @@ const MapScreen = () => {
             />
           ))}
       </MapView>
+      <Text>{selectedFilter}</Text>
     </View>
   );
 };
